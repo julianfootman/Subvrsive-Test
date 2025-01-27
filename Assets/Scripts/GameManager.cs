@@ -10,23 +10,37 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform _spawnCenter;
     [SerializeField] private float _spawnRadius = 10;
     [SerializeField] private int _maxAttempts = 10;
-    [SerializeField] private CinemachineVirtualCamera _virtualCamera;
     [SerializeField] private Weapon[] _weaponPrefabs;
     [SerializeField] private KeyCode _nextPlayerCamera;
+    [SerializeField] private KeyCode _cameraSwitchButton;
 
-    private List<Player> _spawnedPlayers = new List<Player>();
-    public List<Player> SpanwedPlayers => _spawnedPlayers;
+    private List<Player> _alivePlayers = new List<Player>();
 
     private int _currentViewIndex;
+    private CameraMode _currentCameraMode;
+    private Player _activePlayer;
+
+    private static GameManager _singleton;
+    private enum CameraMode
+    {
+        FPS = 0, TPS = 1
+    }
+
+    private void Awake()
+    {
+        _singleton = this;
+        _currentCameraMode = CameraMode.FPS;
+    }
 
     private void Start()
     {
-        for (int i = 0; i < 10; i ++)
+        int playerCount = PlayerPrefs.GetInt("PlayerCount", 10);
+        for (int i = 0; i < playerCount; i ++)
         {
             SpawnPlayer();
         }
 
-        ViewNextPlayer();
+        ViewCurrentPlayer();
     }
 
     private void SpawnPlayer()
@@ -55,25 +69,79 @@ public class GameManager : MonoBehaviour
         Player spawnedPlayer = Instantiate(_playerPrefab, randomPosition, Quaternion.identity);
         int randomWeaponIdx = Random.Range(0, _weaponPrefabs.Length);
         spawnedPlayer.EquipWeapon(_weaponPrefabs[randomWeaponIdx]);
-        _spawnedPlayers.Add(spawnedPlayer);
+        _alivePlayers.Add(spawnedPlayer);
     }
 
-    private void ViewNextPlayer()
+    private void ViewCurrentPlayer()
     {
-        _currentViewIndex++;
-        if (_currentViewIndex == _spawnedPlayers.Count)
+        CinemachineBrain brain = Camera.main.GetComponent<CinemachineBrain>();
+        if (brain.ActiveVirtualCamera != null)
         {
-            _currentViewIndex = 0;
+            brain.ActiveVirtualCamera.VirtualCameraGameObject.SetActive(false);
         }
 
-        _virtualCamera.Follow = _spawnedPlayers[_currentViewIndex].FirstPersonCameraFollow;
+
+        if (_alivePlayers.Count == 1)
+        {
+            _alivePlayers[0].EnterWinnerState();
+            _alivePlayers[0].ThirdPersonCamera.gameObject.SetActive(true);
+        }
+        else
+        {
+            if (_currentCameraMode == CameraMode.FPS)
+            {
+                _alivePlayers[_currentViewIndex].FirstPersonCamera.gameObject.SetActive(true);
+            }
+            else
+            {
+                _alivePlayers[_currentViewIndex].ThirdPersonCamera.gameObject.SetActive(true);
+            }
+        }        
+
+        _activePlayer = _alivePlayers[_currentViewIndex];
+
+        GameUI.Get().SetHP(_alivePlayers[_currentViewIndex].CurrentHealth);
+        GameUI.Get().UpdateAlivePlayers(_alivePlayers.Count);
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(_nextPlayerCamera))
         {
-            ViewNextPlayer();
+            _currentViewIndex++;
+            if (_alivePlayers.Count == _currentViewIndex)
+            {
+                _currentViewIndex = 0;
+            }
+            ViewCurrentPlayer();
+        }
+
+        if (Input.GetKeyDown(_cameraSwitchButton))
+        {
+            _currentCameraMode = (_currentCameraMode == CameraMode.TPS ? CameraMode.FPS : CameraMode.TPS);
+            ViewCurrentPlayer();
+        }
+    }
+
+    public Player GetActivePlayer()
+    {
+        return _activePlayer;
+    }
+
+    public static GameManager Get()
+    {
+        return _singleton;
+    }
+
+    public void HandlePlayerDeath(Player player)
+    {
+        _alivePlayers.Remove(player);
+        GameUI.Get().UpdateAlivePlayers(_alivePlayers.Count);
+
+        if (player == _activePlayer)
+        {
+            _currentViewIndex = Random.Range(0, _alivePlayers.Count);
+            ViewCurrentPlayer();
         }
     }
 }

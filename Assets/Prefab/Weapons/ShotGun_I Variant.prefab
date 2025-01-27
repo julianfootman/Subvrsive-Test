@@ -180,7 +180,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _speed: 0
-  _range: 10
+  _range: 20
   _muzzle: {fileID: 4188957396416046920}
   _rigLeft: {fileID: 2934822374127230745}
   _rigRight: {fileID: 5694565560959204861}

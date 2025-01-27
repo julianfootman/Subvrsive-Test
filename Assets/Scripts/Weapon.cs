@@ -12,12 +12,13 @@ public class Weapon : MonoBehaviour
     public Transform LeftRig => _rigLeft;
     public Transform RightRig => _rigRight;
     public float Range => _range;
+    public float CoolDown => 10f / Mathf.Clamp(0, _speed, 100);
 
     public void LaunchProjectile(Vector3 direction)
     {
         Bullet bullet = Instantiate(_bullet);
         bullet.transform.position = _muzzle.transform.position;
-        bullet.Launch(direction);
+        bullet.Launch(direction, _range);
     }
 
     private void OnDrawGizmos()

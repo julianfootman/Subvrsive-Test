@@ -1,3 +1,4 @@
+using Cinemachine;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Animations.Rigging;
@@ -5,6 +6,9 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
+    [Header("Movement")]
+    [SerializeField] private float _moveSpeed = 3.5f;
+    [SerializeField] private float _angularSpeed = 120;
     [Header("References")]
     [SerializeField] private Animator _animator;
     [SerializeField] private NavMeshAgent _navMeshAgent;
@@ -12,8 +16,8 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform _weaponPos;
     [SerializeField] private TwoBoneIKConstraint _leftBoneIK;
     [SerializeField] private TwoBoneIKConstraint _rightBoneIK;
-    [SerializeField] private Transform _firstPersonCameraFollow;
-    [SerializeField] private Transform _thirdPersonCameraFollow;
+    [SerializeField] private CinemachineVirtualCamera _firstPersonCamera;
+    [SerializeField] private CinemachineVirtualCamera _thirdPersonCamera;
     [SerializeField] private Renderer _renderer;
     [SerializeField] private GameObject _boneParent;
     [Header("Enemy Detect")]
@@ -25,26 +29,36 @@ public class Player : MonoBehaviour
     [SerializeField] private Slider _healthUI;
 
     private float _currentHealth;
+    private float _shotCoolDown;
     private Weapon _equippedWeapon;
     private Transform _target;
     private bool _isDead;
 
     private const float _maxHealth = 100f;
 
-    public Transform FirstPersonCameraFollow => _firstPersonCameraFollow;
-    public Transform ThirdPersonCameraFollow => _thirdPersonCameraFollow;
+    public CinemachineVirtualCamera FirstPersonCamera => _firstPersonCamera;
+    public CinemachineVirtualCamera ThirdPersonCamera => _thirdPersonCamera;
     public bool IsDead => _isDead;
+    public float CurrentHealth => _currentHealth;
+
+    private void Awake()
+    {
+        _currentHealth = _maxHealth;
+    }
 
     private void Start()
     {
         _healthUI.maxValue = _maxHealth;
         _healthUI.minValue = 0;
-        _currentHealth = _maxHealth;
 
         for (int i = 0; i < 5; i++)
         {
             UpdateColor(i);
         }
+
+        _moveSpeed = Random.Range(3, 10);
+        _navMeshAgent.speed = _moveSpeed;
+        _navMeshAgent.angularSpeed = _angularSpeed;
     }
 
     private void UpdateColor(int yPixel)
@@ -68,6 +82,7 @@ public class Player : MonoBehaviour
     public void Shot()
     {
         _animator.SetTrigger("Shot");
+        _shotCoolDown = 0;
     }
 
     public void TakeDamage(float damage)
@@ -76,6 +91,11 @@ public class Player : MonoBehaviour
         if (_currentHealth == 0)
         {
             EnterDeathState();
+        }
+
+        if (GameManager.Get().GetActivePlayer() == this)
+        {
+            GameUI.Get().SetHP(_currentHealth);
         }
     }
 
@@ -87,6 +107,14 @@ public class Player : MonoBehaviour
         GetComponent<Rigidbody>().isKinematic = true;
         _healthUI.gameObject.SetActive(false);
         _equippedWeapon.gameObject.SetActive(false);
+        GameManager.Get().HandlePlayerDeath(this);
+    }
+
+    public void EnterWinnerState()
+    {
+        _animator.SetTrigger("Win");
+        _navMeshAgent.speed = 0;
+        _navMeshAgent.angularSpeed = 0;
     }
 
     public void LaunchProjectile()
@@ -190,7 +218,11 @@ public class Player : MonoBehaviour
         }
         else
         {
-            Shot();
+            if (_shotCoolDown < _equippedWeapon.CoolDown)
+            {
+                Shot();
+            }
+             _shotCoolDown += Time.deltaTime;
         }
     }
 
