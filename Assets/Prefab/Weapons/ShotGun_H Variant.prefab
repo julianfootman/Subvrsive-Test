@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4485244531432319843
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 799455454711401074}
+  m_Layer: 0
+  m_Name: Muzzle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &799455454711401074
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4485244531432319843}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.054, z: 0.689}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3044196608664942163}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4595057442849149254
 GameObject:
   m_ObjectHideFlags: 0
@@ -123,6 +154,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8179220902118971389, guid: 596b2dd212488f543bd4d53f42bfaaa6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4097339244319994987}
+    - targetCorrespondingSourceObject: {fileID: 8179220902118971389, guid: 596b2dd212488f543bd4d53f42bfaaa6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 799455454711401074}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 8847812673194167623, guid: 596b2dd212488f543bd4d53f42bfaaa6, type: 3}
       insertIndex: -1
@@ -147,8 +181,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _speed: 0
   _range: 10
+  _muzzle: {fileID: 799455454711401074}
   _rigLeft: {fileID: 4097339244319994987}
   _rigRight: {fileID: 279435893210332142}
+  _bullet: {fileID: 5315032409105142574, guid: 9fb5af4aa2e6cc44b806e5f046f2e4c5, type: 3}
 --- !u!4 &3044196608664942163 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8179220902118971389, guid: 596b2dd212488f543bd4d53f42bfaaa6, type: 3}
