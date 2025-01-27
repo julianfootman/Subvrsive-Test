@@ -141,7 +141,8 @@ public class GameManager : MonoBehaviour
         if (player == _activePlayer)
         {
             _currentViewIndex = Random.Range(0, _alivePlayers.Count);
-            ViewCurrentPlayer();
         }
+
+        ViewCurrentPlayer();
     }
 }
