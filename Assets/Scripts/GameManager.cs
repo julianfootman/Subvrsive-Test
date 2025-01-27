@@ -88,6 +88,11 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            if (_currentViewIndex >= _alivePlayers.Count)
+            {
+                _currentViewIndex = Random.Range(0, _alivePlayers.Count);
+            }
+
             if (_currentCameraMode == CameraMode.FPS)
             {
                 _alivePlayers[_currentViewIndex].FirstPersonCamera.gameObject.SetActive(true);
