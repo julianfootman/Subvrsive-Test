@@ -81,6 +81,12 @@ public class GameManager : MonoBehaviour
         }
 
 
+        if (_currentViewIndex >= _alivePlayers.Count)
+        {
+            _currentViewIndex = Random.Range(0, _alivePlayers.Count);
+        }
+
+
         if (_alivePlayers.Count == 1)
         {
             _alivePlayers[0].EnterWinnerState();
@@ -88,11 +94,6 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            if (_currentViewIndex >= _alivePlayers.Count)
-            {
-                _currentViewIndex = Random.Range(0, _alivePlayers.Count);
-            }
-
             if (_currentCameraMode == CameraMode.FPS)
             {
                 _alivePlayers[_currentViewIndex].FirstPersonCamera.gameObject.SetActive(true);
